@@ -5,7 +5,7 @@ authors = ["michael hertsens <michael.hertsens@student.odisee.be>"]
 edition = "2018"
 description = "A small Rust development tool, to make a modules and submodules and to write the dependencies in the main rust file."
 keywords = ["cli-tool","rust modules"]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
+readme = "README.md"
+repository = "https://github.com/mich2000/module_generator"
+homepage = "https://github.com/mich2000/module_generator"
+license = "MIT OR Apache-2.0"
