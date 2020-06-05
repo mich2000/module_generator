@@ -110,7 +110,12 @@ pub fn create_mod_tree(module_name : &str, list_modules : Vec<&str>, _write_in_m
  **/
 fn write_in_main(line_to_be_controller : Vec<String>) -> &'static str {
     let mut path = env::current_dir().unwrap();
-    path.push("src/main.rs");
+    path.push("src");
+    if path.join("main.rs").exists() {
+        path.push("main.rs");
+    } else if path.join("lib.rs").exists() {
+        path.push("lib.rs");
+    }
     let mut usages_for_main : String = format!("{}",&reader::control_file_lines(path.to_str().unwrap().to_owned(),line_to_be_controller));
     let content_file = fs::read_to_string(&path).expect("Could not read the path");
     usages_for_main.push_str(&format!("\n{}",content_file));
