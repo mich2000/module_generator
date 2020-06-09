@@ -2,6 +2,8 @@ use std::fs;
 use std::io;
 use std::env;
 
+use std::path::{PathBuf,Path};
+
 use crate::reader;
 
 /**
@@ -69,32 +71,40 @@ pub fn create_mod_tree(module_name : &str, list_modules : Vec<&str>, _write_in_m
         panic!("This is not a rust cargo project directory.");
     }
     if owned_list_modules.len() > 0 {
-        match make_dir(module_name){
-            Ok(_e) => output.push_str(&format!("Succeeded to make directory {}\n", &module_name)),
-            Err(_e) => panic!("Panicked because of {:?}",_e)
-        };
+        if !Path::new(&format!("./src/{}",&module_name)).exists() {
+            match make_dir(module_name){
+                Ok(_e) => output.push_str(&format!("Succeeded to make directory {}\n", &module_name)),
+                Err(_e) => println!("{:?}",_e)
+            };
+        }
         output.push_str("Successfully made a directory for the modules.\n");
         line_to_be_controller.push(format!("mod {};", &module_name));
         for module in owned_list_modules.to_owned() {
-            match create_rust_module(module_name, &module) {
-                Ok(_e) => {
-                    output.push_str(&format!("Module {} has been added in the supmodule {}.\n",&module, module_name));
-                    line_to_be_controller.push(format!("use {}::{};",&module_name, module));
-                },
-                Err(_e) => panic!("Panicked because of {:?}",_e)
+            if !Path::new(&format!("./src/{}/{}",&module_name, &module)).exists() {
+                match create_rust_module(module_name, &module) {
+                    Ok(_e) => {
+                        output.push_str(&format!("Module {} has been added in the supmodule {}.\n",&module, module_name));
+                        line_to_be_controller.push(format!("use {}::{};",&module_name, module));
+                    },
+                    Err(_e) => println!("{:?}",_e)
+                }
             }
         }
-        match create_rust_module_holder(&module_name, owned_list_modules) {
-            Ok(_e) => output.push_str(&format!("Module lister {} has successfully been made.\n",module_name)),
-            Err(_e) => panic!("Panicked because of {:?}.",_e)
+        if !Path::new(&format!("./src/{}/mod.rs", &module_name)).exists() {
+            match create_rust_module_holder(&module_name, owned_list_modules) {
+                Ok(_e) => output.push_str(&format!("Module lister {} has successfully been made.\n",module_name)),
+                Err(_e) => println!("{:?}",_e)
+            }
         }
     } else {
-        match create_rust_module(module_name, "") {
-            Ok(_e) => {
-                output.push_str(&format!("Module {} has been added.\n", module_name));
-                line_to_be_controller.push(format!("mod {};",&module_name));
-            },
-            Err(_e) => panic!("Panicked because of {:?}",_e)
+        if !Path::new(&format!("./src/{}",&module_name)).exists() {
+            match create_rust_module(module_name, "") {
+                Ok(_e) => {
+                    output.push_str(&format!("Module {} has been added.\n", module_name));
+                    line_to_be_controller.push(format!("mod {};",&module_name));
+                },
+                Err(_e) => println!("{:?}",_e)
+            }
         }
     }
     if _write_in_main {
