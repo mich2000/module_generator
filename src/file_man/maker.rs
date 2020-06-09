@@ -2,7 +2,7 @@ use std::fs;
 use std::io;
 use std::env;
 
-use std::path::{PathBuf,Path};
+use std::path::Path;
 
 use crate::reader;
 
@@ -80,7 +80,7 @@ pub fn create_mod_tree(module_name : &str, list_modules : Vec<&str>, _write_in_m
         output.push_str("Successfully made a directory for the modules.\n");
         line_to_be_controller.push(format!("mod {};", &module_name));
         for module in owned_list_modules.to_owned() {
-            if !Path::new(&format!("./src/{}/{}",&module_name, &module)).exists() {
+            if !Path::new(&format!("./src/{}/{}.rs",&module_name, &module)).exists() {
                 match create_rust_module(module_name, &module) {
                     Ok(_e) => {
                         output.push_str(&format!("Module {} has been added in the supmodule {}.\n",&module, module_name));
