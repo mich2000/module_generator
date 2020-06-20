@@ -90,11 +90,9 @@ pub fn create_mod_tree(module_name : &str, list_modules : Vec<&str>, _write_in_m
                 }
             }
         }
-        if !Path::new(&format!("./src/{}/mod.rs", &module_name)).exists() {
-            match create_rust_module_holder(&module_name, owned_list_modules) {
-                Ok(_e) => output.push_str(&format!("Module lister {} has successfully been made.\n",module_name)),
-                Err(_e) => println!("{:?}",_e)
-            }
+        match create_rust_module_holder(&module_name, owned_list_modules) {
+            Ok(_e) => output.push_str(&format!("Module lister {} has successfully been made.\n",module_name)),
+            Err(_e) => println!("{:?}",_e)
         }
     } else {
         if !Path::new(&format!("./src/{}",&module_name)).exists() {
