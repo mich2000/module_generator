@@ -1,6 +1,6 @@
 [package]
 name = "module_generator"
-version = "0.1.4"
+version = "0.2.0"
 authors = ["michael hertsens <michael.hertsens@student.odisee.be>"]
 edition = "2018"
 description = "A small Rust development tool, to make a modules and submodules and to write the dependencies in the main rust file."
@@ -9,3 +9,12 @@ readme = "README.md"
 repository = "https://github.com/mich2000/module_generator"
 homepage = "https://github.com/mich2000/module_generator"
 license = "MIT OR Apache-2.0"
+
+[profile.release]
+opt-level = 'z'
+lto = true
+codegen-units = 1
+panic = 'abort'
+
+[build]
+RUSTFLAGS="-C target-cpu=native link-arg=-s --strip-all"

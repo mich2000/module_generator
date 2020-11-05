@@ -13,7 +13,7 @@ fn make_dir(folder : &str) -> io::Result<()> {
     let mut path = env::current_dir().unwrap();
     path.push(&format!("./src/{}",folder));
     println!("{:?}", path.display());
-    return fs::create_dir(path);
+    fs::create_dir(path)
 }
 
 
@@ -29,7 +29,7 @@ fn create_rust_module(sup_module_name : &str,module_name : &str) -> io::Result<(
     path.push(&sup_module_name);
     path.push(&module_name);
     path.set_extension("rs");
-    return fs::write(path, "");
+    fs::write(path, "")
 }
 
 /**
@@ -48,7 +48,7 @@ fn create_rust_module_holder(folder_name : &str , list_modules : Vec<String>) ->
     for module in list_modules {
         content_file.push_str(&format!("pub mod {};\n",module));
     }
-    return fs::write(path, content_file);
+    fs::write(path, content_file)
 }
 
 /**
@@ -70,7 +70,7 @@ pub fn create_mod_tree(module_name : &str, list_modules : Vec<&str>, _write_in_m
     } else {
         panic!("This is not a rust cargo project directory.");
     }
-    if owned_list_modules.len() > 0 {
+    if !owned_list_modules.is_empty() {
         if !Path::new(&format!("./src/{}",&module_name)).exists() {
             match make_dir(module_name){
                 Ok(_e) => output.push_str(&format!("Succeeded to make directory {}\n", &module_name)),
@@ -84,7 +84,6 @@ pub fn create_mod_tree(module_name : &str, list_modules : Vec<&str>, _write_in_m
                 match create_rust_module(module_name, &module) {
                     Ok(_e) => {
                         output.push_str(&format!("Module {} has been added in the supmodule {}.\n",&module, module_name));
-                        line_to_be_controller.push(format!("use {}::{};",&module_name, module));
                     },
                     Err(_e) => println!("{:?}",_e)
                 }
@@ -94,21 +93,19 @@ pub fn create_mod_tree(module_name : &str, list_modules : Vec<&str>, _write_in_m
             Ok(_e) => output.push_str(&format!("Module lister {} has successfully been made.\n",module_name)),
             Err(_e) => println!("{:?}",_e)
         }
-    } else {
-        if !Path::new(&format!("./src/{}",&module_name)).exists() {
-            match create_rust_module(module_name, "") {
-                Ok(_e) => {
-                    output.push_str(&format!("Module {} has been added.\n", module_name));
-                    line_to_be_controller.push(format!("mod {};",&module_name));
-                },
-                Err(_e) => println!("{:?}",_e)
-            }
+    } else if !Path::new(&format!("./src/{}",&module_name)).exists() {
+        match create_rust_module(module_name, "") {
+            Ok(_e) => {
+                output.push_str(&format!("Module {} has been added.\n", module_name));
+                line_to_be_controller.push(format!("mod {};",&module_name));
+            },
+            Err(_e) => println!("{:?}",_e)
         }
     }
     if _write_in_main {
         output.push_str(&format!("{}\n",write_in_main(line_to_be_controller)))
     }
-    return output;
+    output
 }
 
 /**
@@ -124,10 +121,10 @@ fn write_in_main(line_to_be_controller : Vec<String>) -> &'static str {
     } else if path.join("lib.rs").exists() {
         path.push("lib.rs");
     }
-    let mut usages_for_main : String = format!("{}",&reader::control_file_lines(path.to_str().unwrap().to_owned(),line_to_be_controller));
+    let mut usages_for_main : String = reader::control_file_lines(path.to_str().unwrap().to_owned(),line_to_be_controller);
     let content_file = fs::read_to_string(&path).expect("Could not read the path");
     usages_for_main.push_str(&format!("\n{}",content_file));
-    return match fs::write(path, usages_for_main){
+    match fs::write(path, usages_for_main){
         Ok(_e) => "Managed to add the usages in the main.rs file.",
         Err(_e) => "Did not manage to add the usages in the main.rs file."
     }

@@ -1,9 +1,9 @@
 mod file_man;
-mod module_tree;
+mod tree_config;
 
 use file_man::{reader};
 use std::env;
-use module_tree::tree_config::ModuleTreeConfig;
+use tree_config::ModuleTreeConfig;
 
 fn main() {
     let vector_module_tree = args_to_vec_module_tree(env::args().collect());
@@ -13,22 +13,16 @@ fn main() {
 /**
  * Parses all the arguments and returns a ModuleTreeConfig struct vector. It will make a 1st iteration over all the arguments except the 1st one, and will control in the first place if it is equal to --write-in-main. --write-in-main is a flag indicatin that the usage of the modules/submodules should be written in the main rust file. In the 2nd iteration all the strings that are not equalt to --write-in-main will be added and parsed to return the vector.
  */
-fn args_to_vec_module_tree(_args : Vec<String>) -> Vec<ModuleTreeConfig> {
+fn args_to_vec_module_tree(args : Vec<String>) -> Vec<ModuleTreeConfig> {
     let mut vec_module_tree_config : Vec<ModuleTreeConfig> = Vec::new();
-    let mut write_in_main = false;
-    for arg in _args.to_owned() {
-        if &arg == "--write-in-main" {
-            write_in_main = true;
-        }
-    }
-    for i in 1.._args.len(){
-        let arg = &_args[i];
-        if arg != "--write-in-main" {
+    let write_in_main = args.contains(&"-W".to_owned());
+    for arg in args.iter().skip(1) {
+        if arg != "-W" {
             println!("{}",&arg);
             vec_module_tree_config.push(ModuleTreeConfig::new(&arg, write_in_main));
         }
     }
-    return vec_module_tree_config;
+    vec_module_tree_config
 }
 
 /**
@@ -39,5 +33,5 @@ fn exec_vec_module_tree(vec_module_tree_config : Vec<ModuleTreeConfig>) -> Strin
     for tree_config in vec_module_tree_config {
         output.push_str(&format!("{}\n", tree_config.execute()));
     }
-    return output;
+    output
 }
