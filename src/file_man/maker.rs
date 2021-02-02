@@ -61,7 +61,7 @@ fn create_rust_module_holder(folder_name: &str, list_modules: Vec<String>) -> io
  **/
 pub fn create_mod_tree(module_name: &str, list_modules: Vec<&str>, _write_in_main: bool) -> String {
     let mut output = String::new();
-    let mut line_to_be_controller: Vec<String> = vec![];
+    let mut line_to_be_controller: String = Default::default();
     let owned_list_modules: Vec<String> = list_modules
         .iter()
         .map(|a| a.to_string())
@@ -82,34 +82,34 @@ pub fn create_mod_tree(module_name: &str, list_modules: Vec<&str>, _write_in_mai
             };
         }
         output.push_str("Successfully made a directory for the modules.\n");
-        line_to_be_controller.push(format!("mod {};", &module_name));
+        line_to_be_controller.push_str(&format!("mod {};", &module_name));
         for module in owned_list_modules.to_owned() {
             if !Path::new(&format!("./src/{}/{}.rs", &module_name, &module)).exists() {
                 match create_rust_module(module_name, &module) {
-                    Ok(_e) => {
+                    Ok(_) => {
                         output.push_str(&format!(
                             "Module {} has been added in the supmodule {}.\n",
                             &module, module_name
                         ));
                     }
-                    Err(_e) => println!("{:?}", _e),
+                    Err(e) => println!("{:?}", e),
                 }
             }
         }
         match create_rust_module_holder(&module_name, owned_list_modules) {
-            Ok(_e) => output.push_str(&format!(
+            Ok(_) => output.push_str(&format!(
                 "Module lister {} has successfully been made.\n",
                 module_name
             )),
-            Err(_e) => println!("{:?}", _e),
+            Err(e) => println!("{:?}", e),
         }
     } else if !Path::new(&format!("./src/{}", &module_name)).exists() {
         match create_rust_module(module_name, "") {
-            Ok(_e) => {
+            Ok(_) => {
                 output.push_str(&format!("Module {} has been added.\n", module_name));
-                line_to_be_controller.push(format!("mod {};", &module_name));
+                line_to_be_controller.push_str(&format!("mod {};", &module_name));
             }
-            Err(_e) => println!("{:?}", _e),
+            Err(e) => println!("{:?}", e),
         }
     }
     if _write_in_main {
@@ -123,7 +123,8 @@ pub fn create_mod_tree(module_name: &str, list_modules: Vec<&str>, _write_in_mai
  * Arguments:
  * - line_to_be_controller: These lines will be controlled if they are present in the main rust file and be written in it if these are not in there.
  **/
-fn write_in_main(line_to_be_controller: Vec<String>) -> &'static str {
+fn write_in_main(line_to_be_controller: String) -> &'static str {
+    use crate::reader::read_lines;
     let mut path = env::current_dir().unwrap();
     path.push("src");
     if path.join("main.rs").exists() {
@@ -131,16 +132,14 @@ fn write_in_main(line_to_be_controller: Vec<String>) -> &'static str {
     } else if path.join("lib.rs").exists() {
         path.push("lib.rs");
     }
-    let mut usages_for_main: String =
-        reader::control_file_lines(path.to_str().unwrap().to_owned(), line_to_be_controller);
-    let content_file = fs::read_to_string(&path).expect("Could not read the path");
-    if !content_file.contains(&usages_for_main) {
-        usages_for_main.push_str(&format!("\n{}", content_file));
-    } else {
-        usages_for_main = String::new();
-        usages_for_main.push_str(&content_file);
+    let mut main_code: String = String::new();
+    if let Ok(lines) = read_lines(&path) {
+        if !lines.filter(|line| line.is_ok()).any(|line| line.unwrap().trim() == line_to_be_controller.trim()) {
+            main_code.push_str(&format!("{}\n\n", line_to_be_controller));
+        }
     }
-    match fs::write(path, usages_for_main) {
+    main_code.push_str(fs::read_to_string(&path).expect("Could not read the path").trim());
+    match fs::write(path, main_code.trim()) {
         Ok(_) => "Managed to add the usages in the main.rs file.",
         Err(_) => "Did not manage to add the usages in the main.rs file.",
     }

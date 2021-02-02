@@ -11,7 +11,7 @@ fn main() {
 }
 
 /**
- * Parses all the arguments and returns a ModuleTreeConfig struct vector. It will make a 1st iteration over all the arguments except the 1st one, and will control in the first place if it is equal to --write-in-main. --write-in-main is a flag indicatin that the usage of the modules/submodules should be written in the main rust file. In the 2nd iteration all the strings that are not equalt to --write-in-main will be added and parsed to return the vector.
+ * Parses all the arguments and returns a ModuleTreeConfig struct vector. It will make a 1st iteration over all the arguments except the 1st one, and will control in the first place if it is equal to -W. -W is a flag indication that the usage of the modules/submodules should be written in the main rust file. In the 2nd iteration all the strings that are not equal to --write-in-main will be added and parsed to return the vector.
  */
 fn args_to_vec_module_tree(args: Vec<String>) -> Vec<ModuleTreeConfig> {
     let mut vec_module_tree_config: Vec<ModuleTreeConfig> = Vec::new();

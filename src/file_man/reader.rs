@@ -16,7 +16,6 @@ pub fn get_files_of_dir() -> ReadDir {
  * It decides if a directory is a cargo directory if contains the following elements:
  * - src folder
  * - toml file
- * - lock file
  **/
 pub fn current_path_rust_dir() -> bool {
     let mut has_src_dir = false;
@@ -36,29 +35,9 @@ pub fn current_path_rust_dir() -> bool {
 }
 
 /**
- * A path is given as parameter, this one is used to iterate through it and compare it with each element of a string vector.
- * It will compare these element in the string vector and if the line isn't equal to it.
- **/
-pub fn control_file_lines(path: String, module_use_lines: Vec<String>) -> String {
-    let mut non_present_in_file: String = String::new();
-    println!("{}", module_use_lines.len());
-    for module in module_use_lines {
-        for line in read_lines(&path).unwrap() {
-            if let Ok(line_ok) = line {
-                if !line_ok.is_empty() && line_ok.trim() != module.trim() {
-                    non_present_in_file.push_str(&format!("{}\n", &module));
-                    break;
-                }
-            }
-        }
-    }
-    non_present_in_file
-}
-
-/**
  * Returns a result iterator which goes over all the lines in a particular file.
  */
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+pub fn read_lines<P>(filename: &P) -> io::Result<io::Lines<io::BufReader<File>>>
 where
     P: AsRef<Path>,
 {
