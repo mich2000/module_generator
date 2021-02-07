@@ -28,7 +28,10 @@ fn create_rust_module(sup_module_name: &str, module_name: &str) -> io::Result<()
     path.push(&sup_module_name);
     path.push(&module_name);
     path.set_extension("rs");
-    fs::write(path, "")
+    if !path.exists() {
+        fs::write(path, "")?;
+    }
+    Ok(())
 }
 
 /**
@@ -134,11 +137,18 @@ fn write_in_main(line_to_be_controller: String) -> &'static str {
     }
     let mut main_code: String = String::new();
     if let Ok(lines) = read_lines(&path) {
-        if !lines.filter(|line| line.is_ok()).any(|line| line.unwrap().trim() == line_to_be_controller.trim()) {
+        if !lines
+            .filter(|line| line.is_ok())
+            .any(|line| line.unwrap().trim() == line_to_be_controller.trim())
+        {
             main_code.push_str(&format!("{}\n\n", line_to_be_controller));
         }
     }
-    main_code.push_str(fs::read_to_string(&path).expect("Could not read the path").trim());
+    main_code.push_str(
+        fs::read_to_string(&path)
+            .expect("Could not read the path")
+            .trim(),
+    );
     match fs::write(path, main_code.trim()) {
         Ok(_) => "Managed to add the usages in the main.rs file.",
         Err(_) => "Did not manage to add the usages in the main.rs file.",

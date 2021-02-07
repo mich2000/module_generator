@@ -10,5 +10,7 @@ This tool should only be used to create modules and generate these uses in you'r
 
 This is a complete example where I make a module named `models` and it has the submodules `page` and `person` in it. I also set the flag to write the usages in the main rust file, the flag is **optional**.
 
-```cd **cargo_directory**
-cargo run "models:page,person" -W```
+```
+cd **cargo_directory**
+cargo run "models:page,person" -W
+```
